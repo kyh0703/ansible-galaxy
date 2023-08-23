@@ -1,0 +1,58 @@
+---
+- name: Check if console-setup exists
+  stat:
+    path: /etc/default/console-setup
+  register: console_setup_file
+
+- name: Install console-setup
+  become: true
+  apt:
+    name: console-setup
+    state: present
+  when: console_setup_file.stat.exists
+
+- name: Edit console-setup to utf-8
+  become: true
+  lineinfile:
+    dest: /etc/default/console-setup
+    regexp: ^CHARMAP=
+    line: CHARMAP="UTF-8"
+    state: present
+  when: console_setup_file.stat.exists
+  notify:
+    - Run dpkg-reconfigure console-setup
+
+- name: Install zsh
+  apt:
+    name:
+      - 'git'
+      - 'wget'
+      - 'curl'
+      - 'zsh'
+    state: present
+
+- name: Check if .zshrc exists
+  stat:
+    path: ~/.zshrc
+  register: stat_rc_result
+
+- name: Check if .oh-my-zsh exists
+  stat:
+    path: ~/.oh-my-zsh
+  register: stat_oh_my_zsh_result
+
+- name: Clone oh-my-zsh
+  git:
+    repo: https://github.com/robbyrussell/oh-my-zsh
+    dest: ~/.oh-my-zsh
+  when: not stat_oh_my_zsh_result.stat.exists
+
+- name: Creat new ~/.zshrc
+  copy:
+    src: ~/.oh-my-zsh/templates/zshrc.zsh-template
+    dest: ~/.zshrc
+  when: not stat_rc_result.stat.exists
+
+- name: Change base shell cmd
+  become: true
+  shell: chsh -s /usr/bin/zsh {{ ansible_user }}

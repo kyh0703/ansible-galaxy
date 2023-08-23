@@ -1,0 +1,20 @@
+---
+- name: Install helm requirement
+  apt:
+    name: apt-transport-https
+    state: present
+
+- name: Add gpg key
+  shell: '{{ item }}'
+  with_items:
+    - curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /usr/share/keyrings/helm.gpg > /dev/null
+    - echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+
+- name: Sudo apt update
+  apt:
+    update_cache: yes
+
+- name: Install helm
+  apt:
+    name: helm
+    state: present

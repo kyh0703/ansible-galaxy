@@ -1,0 +1,7 @@
+---
+- name: Set Themes
+  lineinfile:
+    dest: ~/.zshrc
+    regexp: ^ZSH_THEME=\"
+    line: ZSH_THEME="gentoo"
+    state: present

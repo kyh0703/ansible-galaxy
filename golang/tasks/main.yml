@@ -1,0 +1,38 @@
+---
+- name: Check if go is installed
+  stat:
+    path: /usr/local/go
+  register: stat_go_result
+
+- name: Delete privious go
+  shell: rm -rf /usr/local/go
+  when: not stat_go_result.stat.exists
+
+- name: Download file
+  get_url:
+    url: https://go.dev/dl/go{{ go_version }}.linux-amd64.tar.gz
+    dest: /tmp/go{{ go_version }}.linux-amd64.tar.gz
+
+- name: Install golang
+  shell: tar -C /usr/local -xzf /tmp/go{{ go_version }}.linux-amd64.tar.gz
+
+- name: Remove file
+  file:
+    path: /tmp/go{{ go_version }}.linux-amt64.tar.gz
+    state: absent
+
+- name: Set etc profile
+  lineinfile:
+    path: /etc/profile
+    line: 'export PATH=$PATH:/usr/local/go/bin'
+
+- name: Get current version
+  shell: /usr/local/go/bin/go version
+  register: go_version_result
+
+- name: Print Go version
+  debug:
+    var: go_version_result.stdout_lines
+
+- include_tasks: setup-Debian.yml
+  when: ansible_os_family == 'Debian'

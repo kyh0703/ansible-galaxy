@@ -1,0 +1,7 @@
+- name: Install golang
+  hosts: all
+  become: True
+  vars:
+    go_version: 1.20.6
+  tasks:
+    - include_tasks: 'tasks/setup.yml'

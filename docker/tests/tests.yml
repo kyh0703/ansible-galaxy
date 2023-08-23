@@ -1,0 +1,5 @@
+- name: Setup docker node
+  hosts: all
+  become: true
+  tasks:
+    - include_tasks: './tasks/{{ linux_name }}.yml'

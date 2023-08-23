@@ -1,0 +1,14 @@
+- name: Setup zsh
+  hosts: all
+  tasks:
+    - include_tasks: 'tasks/install.yml'
+    - include_tasks: 'tasks/theme.yml'
+    - include_tasks: 'tasks/plugin.yml'
+
+- name: print
+  hosts: localhost
+  tasks:
+    - name: print command
+      debug:
+        msg:
+          - 'source ~/.zshrc'

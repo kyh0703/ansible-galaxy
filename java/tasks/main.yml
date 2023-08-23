@@ -1,0 +1,10 @@
+---
+- name: Sudo apt update
+  apt:
+    update_cache: yes
+
+- name: Install java
+  apt:
+    name:
+      - openjdk-{{ jdk_version }}-jdk
+    state: present

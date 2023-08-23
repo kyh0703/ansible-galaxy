@@ -1,0 +1,54 @@
+---
+- name: Uninstall conflicting package
+  shell: 'for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done'
+
+- name: Sudo apt update
+  apt:
+    update_cache: yes
+
+- name: Install docker requirement
+  apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+
+- name: Check if docker gpg
+  stat:
+    path: /etc/apt/keyrings/docker.gpg
+  register: stat_docker_result
+
+- name: Add gpg key
+  shell: '{{ item }}'
+  with_items:
+    - sudo install -m 0755 -d /etc/apt/keyrings
+    - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    - sudo chmod a+r /etc/apt/keyrings/docker.gpg
+    - echo "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+  when: not stat_docker_result.stat.exists
+
+- name: Sudo apt update
+  apt:
+    update_cache: yes
+
+- name: Install docker
+  apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+
+- name: Auth docker
+  shell: '{{ item }}'
+  with_items:
+    - sudo usermod -aG docker {{ ansible_user }}
+
+- name: Start docker service
+  service:
+    name: docker
+    state: restarted
+    enabled: yes

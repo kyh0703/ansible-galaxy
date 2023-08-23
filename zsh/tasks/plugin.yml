@@ -1,0 +1,25 @@
+---
+- name: Check if auto_suggestions exists
+  stat:
+    path: ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+  register: stat_oh_my_zsh_auto_suggestions_result
+
+- name: Setup autosuggestions
+  shell: 'git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions'
+  when: not stat_oh_my_zsh_auto_suggestions_result.stat.exists
+
+- name: Check if zsh-syntax-highlighting exists
+  stat:
+    path: ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+  register: stat_oh_my_zsh_syntax_highlighting_result
+
+- name: Setup zsh syntax highlighting
+  shell: 'git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting'
+  when: not stat_oh_my_zsh_syntax_highlighting_result.stat.exists
+
+- name: Set plugin
+  ansible.builtin.lineinfile:
+    dest: ~/.zshrc
+    regexp: ^plugins=\(
+    line: plugins=(zsh-syntax-highlighting zsh-autosuggestions ansible git autojump)
+    state: present

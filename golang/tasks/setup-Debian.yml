@@ -1,0 +1,10 @@
+---
+- name: Sudo apt update
+  apt:
+    update_cache: yes
+
+- name: Install make
+  apt:
+    name:
+      - make
+    state: present
